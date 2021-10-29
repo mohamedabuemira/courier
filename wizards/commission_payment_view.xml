@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="fms_wizard_payment" model="ir.ui.view">
+        <field name="name">Create payment to commission </field>
+        <field name="model">fms.wizard.commission.payment</field>
+        <field name="arch" type="xml">
+            <form string="Create payment to commission">
+                <sheet>
+                    <group>
+                            <group >
+                                <field name="journal_id" string="Journal Payment"/>
+                            </group>
+                            <group >
+                            <field name="amount_total"/>
+                            </group>
+                            <group string="Account Line" >
+                                <field name="debit_account" string="Expenses Account"/>
+                                <field name="date" string="Date"/>
+                            </group>
+                            <group  string="Analytic">
+                            <field name="analytic_id" string="Analytic Account"/>
+                            <field name="analytic_tag_ids"
+                                  widget="many2many_tags"/>
+                            </group>
+                        <group string="Notes">
+                            <field name="salesperson" string="Capitan"
+                            />
+                            <field name="notes" string="Notes"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="make_payment" string="Confirm" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+     <act_window
+        id="action_commission_wizard_payment"
+        name="Create Payment Commission"
+        res_model="fms.wizard.commission.payment"
+        binding_model="sale.order.commission"
+        target="new"
+        view_mode="form"/>
+
+</odoo>

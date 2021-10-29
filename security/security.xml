@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="fms_group_category" model="ir.module.category">
+        <field name="name">Freight Management System</field>
+        <field name="sequence">50</field>
+    </record>
+    <record model="ir.module.category" id="fms_sales_management">
+        <field name="name">FMS Sales Management</field>
+        <field name="description">User access level for FMS Sales Management module</field>
+        <field name="parent_id" ref="fms.fms_group_category"/>
+        <field name="sequence">51</field>
+    </record>
+    <record id="user_only_order" model="res.groups">
+        <field name="name">User: Own Documents Only</field>
+        <field name="category_id" ref="fms_sales_management"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="user_all_sale" model="res.groups">
+        <field name="name">User: All Documents</field>
+        <field name="category_id" ref="fms_sales_management"/>
+        <field name="implied_ids" eval="[(4, ref('fms.user_only_order'))]"/>
+    </record>
+    <record id="sales_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="fms_sales_management"/>
+        <field name="implied_ids" eval="[(4, ref('user_all_sale'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <record id="users_only_order" model="ir.rule">
+        <field name="name">Users: Own Documents Only</field>
+        <field name="model_id" ref="fms.model_orders"/>
+        <field name="groups" eval="[(4, ref('user_only_order'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+        <field name="domain_force">['|',('user_id','=',user.id),('user_id','=',False)]</field>
+    </record>
+    <record id="all_user_sales" model="ir.rule">
+        <field name="name">User: All Documents</field>
+        <field name="model_id" ref="fms.model_orders"/>
+        <field name="groups" eval="[(4, ref('user_all_sale'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+    </record>
+    <record id="all_sales_manager" model="ir.rule">
+        <field name="name">Manager</field>
+        <field name="model_id" ref="fms.model_orders"/>
+        <field name="groups" eval="[(4, ref('sales_manager'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+        <field name="domain_force">[('model_id.model', 'in', ('orders', 'res.partner'))]</field>
+    </record>
+
+    <record id="group_manager" model="res.groups">
+        <field name="category_id" ref="fms.fms_group_category"/>
+        <field name="name">FMS / Manager</field>
+    </record>
+    <record id="confirm_orders" model="res.groups">
+        <field name="category_id" ref="fms.fms_group_category"/>
+      <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="name">FMS / Confirm Orders</field>
+    </record>
+    <record id="invoiced_orders" model="res.groups">
+        <field name="category_id" ref="fms.fms_group_category"/>
+      <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="name">FMS / Invoiced Orders</field>
+    </record>
+    <record id="group_operation" model="res.groups">
+        <field name="name">FMS / operation</field>
+        <field name="category_id" ref="fms.fms_group_category"/>
+    </record>
+
+    <record id="group_finance" model="res.groups">
+        <field name="category_id" ref="fms.fms_group_category"/>
+        <field name="name">FMS / Finance</field>
+    </record>
+    <record id="group_account" model="res.groups">
+        <field name="category_id" ref="fms.fms_group_category"/>
+        <field name="name">FMS / Customer Services and account manger</field>
+    </record>
+    <record id="only_account_manger_modify" model="ir.rule">
+        <field name="name">Only account manger can modify Course</field>
+        <field name="model_id" ref="fms.model_orders"/>
+        <field name="groups" eval="[(4, ref('group_account'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+        <field name="domain_force">
+            ['|',('account_manger','=',False),('responsible_id', '=', user.id)]
+        </field>
+    </record>
+    <record model="ir.rule" id="fms_order_multi_comp_rule">
+        <field name="name"> FMS Orders multi Company</field>
+        <field name="model_id" ref="fms.model_orders"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!-- Portal Access Rules -->
+    <record id="order_rule_portal" model="ir.rule">
+        <field name="name">Portal Personal Orders</field>
+        <field name="model_id" ref="fms.model_orders"/>
+        <field name="domain_force">[('message_partner_ids','child_of',[user.commercial_partner_id.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+    </record>
+</odoo>

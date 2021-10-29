@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+      <record id="view_fms_account_payment_form_multi_order" model="ir.ui.view">
+            <field name="name">fms.account.payment.form.multi.order</field>
+            <field name="model">fms.create.cod.account.entry</field>
+            <field name="arch" type="xml">
+               <form string="Create COD">
+                    <form string="Make Payment COD">
+                <group>
+                    <group>
+                        <field name="journal_id"/>
+                        <field name="partner_id"/>
+                        <field name="amount_total"/>
+                    </group>
+                    <group>
+                        <field name="date"/>
+                        <field name="notes"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="make_payment" string="Confirm" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+               </form>
+            </field>
+      </record>
+    <act_window
+        id="action_order_wizard_cod_fms"
+        name="Create Customer COD Payment"
+        res_model="fms.create.cod.account.entry"
+        binding_model="orders"
+        target="new"
+        view_mode="form"/>
+</odoo>

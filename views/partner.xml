@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <odoo>
+    <data>
+        <!-- Add instructor field to existing view -->
+        <record model="ir.ui.view" id="partner_Freights_form_view">
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Freight">
+                        <group>
+                            <field name="customer"/>
+                            <field name="shipper"/>
+                            <field name="recevier"/>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="contact_list_action">
+            <field name="name">Partners</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="contact_menu" name="Partners"
+                  parent="master_data"
+                  action="contact_list_action"
+                    sequence="1"
+        />
+    </data>
+</odoo>

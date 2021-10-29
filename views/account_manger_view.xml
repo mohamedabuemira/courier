@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="account_manager_action" model="ir.actions.act_window">
+        <field name="name">Account Manager</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('account_manger','=',True)]</field>
+        <field name="context">{}</field>
+        <field eval="False" name="view_id"/>
+        <field name="search_view_id" ref="hr.view_employee_filter"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">Click to add a new Account Manager.
+          </p>
+            <p>With just a quick glance on Odoo driver screen, you
+            can easily find all the information you need for each person;
+            contact data, job position, availability, etc.
+          </p>
+        </field>
+    </record>
+
+    <menuitem action="account_manager_action" id="menu_account_manager_list" name="Accpunt Manager"
+              parent="master_data" sequence="3"/>
+</odoo>

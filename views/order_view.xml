@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="orders_form_view">
+        <field name="name">orders.form</field>
+        <field name="model">orders</field>
+        <field name="arch" type="xml">
+            <form string="Orders Form">
+                <header>
+                   <button name="action_send_email" type="object"  string="Send By Email"
+                           class="oe_highlight" />
+                    <button name="action_review" type="object" string="Review"
+                            attrs="{'invisible': [('state', 'not in', ['review'])]}"/>
+                    <button name="action_review" class="btn-primary" type="object" string="Review"
+                            attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                    <button name="action_in_stock" type="object" string="In Stock"
+                            attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                    <button name="action_in_stock" class="btn-primary" type="object" string="In Stock"
+                            attrs="{'invisible': [('state', 'not in', ['review','sent'])]}"/>
+
+                    <button name="action_pending" type="object" string="Pending"
+                            attrs="{'invisible': [('state', 'not in', ['draft','review'])]}"/>
+                    <button name="action_pending" class="btn-primary" type="object" string="Pending"
+                            attrs="{'invisible': [('state', 'not in', ['in_stock'])]}"/>
+                    <button name="action_new_date" class="btn-primary"
+                             attrs="{'invisible': [('state', 'not in', ['pending','not_found','return','sent'])]}" type="object" string="New Date"/>
+                    <button name="action_with_captain" class="btn-primary" type="object" string="With Captain"
+                            attrs="{'invisible': [('state', 'not in', ['confirm'])]}"/>
+                    <button name="action_delivered" class="btn-primary" type="object" string="Delivered"
+                            attrs="{'invisible': [('state', 'not in', ['with_captain'])]}"/>
+                    <button name="action_not_found" class="btn-primary" type="object" string="Not Found"
+                            attrs="{'invisible': [('state', 'not in', ['with_captain'])]}"/>
+                    <button name="action_return" class="btn-primary" type="object" string="Return"
+                            attrs="{'invisible': [('state', 'not in', ['with_captain'])]}"/>
+                    <button name="action_back" states="return" type="object" string="In Stock"/>
+                    <button name="action_recived_money" class="btn-primary" type="object" string="Recived Money"
+                            attrs="{'invisible': [('state', 'not in', ['delivered',])]}"/>
+
+                    <button name="action_cancel" states="draft,review,in_stock,confirm,pending,sent" type="object"
+                            string="Cancel"/>
+                    <button name="action_draft" states="cancel" type="object" string="Set to New"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,review,in_stock,confirm,delivered,Pending,with_captain,delivered,not_found,return,recived_money,invoiced"/>
+                </header>
+                <sheet>
+                     <h1>
+                          <field class="oe_inline" name="name" readonly="1"/>
+                    <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" name="button_journal_entries"
+                                    string="Journal Items" type="object"
+                                    groups="account.group_account_user"
+                                     icon="fa-dollar"
+                                     />
+                            <button class="oe_stat_button"
+                                    string="Invoices"
+                                    name="button_invoices" type="object" icon="fa-bars"
+                                    domain="['name', '=', 'invoice_id']">
+                            </button>
+                            <button name="preview_sale_order"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-globe icon">
+                                <span class="o_stat_text">Customer Preview </span>
+
+                            </button>
+                     </div>
+                    </h1>
+                    <group col="4" >
+                        <field attrs="{'readonly':[('state','in',('with_captain', 'recived_money'))]}" name="date"/>
+                        <field name="reference"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" groups="base.group_multi_currency" name="currency_id"/>
+                        <separator colspan="4" string="·  ·   ·  Waybill  ·  ·  ·" style="text-align: center;"/>
+                        <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}"  colspan="4" domain="[('customer','=',True), ('is_company', '=', True)]" name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'default_is_company': True, 'show_vat': True}"/>
+
+                    </group>
+                    <group>
+                        <group string=" From Shipper">
+                        <field  context="{'search_default_customer':1, 'show_address': 1}" domain="[('parent_id','=',partner_id)]" name="partner_order_id" options="{&quot;always_reload&quot;: True}"/>
+                        <field  readonly="0" name="sender_phone"  />
+                         <field name="account_manger" />
+                        </group>
+                    <group string=" From Recevier">
+                        <field  context="{'search_default_customer':1, 'show_address': 1}" domain="[('parent_id','!=',partner_id),('recevier','=',True),('type', '=', 'contact')]" name="recevier_name" options="{&quot;always_reload&quot;: True}"/>
+                        <field  readonly="0" name="recevier_phone"  />
+                        <field name="responsible_id"/>
+                        <field name="user_id"/>
+                      <!--  <field name="sale_journal_id"/> -->
+                        <field name="company_id"
+                        groups="base.group_multi_company" />
+                        </group>
+                    <group>
+                        <field attrs="{'readonly':[('state','in',('confirm', 'cancel'))]}" name="upload_point"/>
+                        <field attrs="{'readonly':[('state','in',('confirm', 'cancel'))]}" name="download_point"/>
+                         <field name="employee_id" string="captain"/>
+                         <field readonly="0" name="employee_phone" string="Phone"/>
+                        </group>
+                     <group string=" COD Details">
+                        <field  readonly="0" name="amount" />
+                        <field string="petty cash" name="petty_cash"  domain="[('type', '=', 'cash')]"/>
+                     </group>
+                    </group>
+                    <notebook>
+                        <page string="Lines">
+                            <group>
+                                <separator colspan="4" string="Waybill Lines"/>
+                                <field attrs="{'readonly':[('state','in',('invoiced', 'cancel'))]}" colspan="4" name="order_line_ids" nolabel="1">
+                                    <tree editable="bottom" string="Waybill Lines">
+                                        <field name="product_id" domain="[('fms_product_category', 'in', ('delivery', 'cod_charges', 'other'))]"/>
+                                        <field name="name"/>
+                                        <field name="product_qty"/>
+                                        <field name="unit_price"/>
+                                        <field name="discount"/>
+                                        <field name="tax_ids" widget="many2many_tags"/>
+                                        <field name="price_subtotal"/>
+                                        <field invisible="1" name="tax_amount"/>
+                                    </tree>
+                                </field>
+                                <group col="4" colspan="4">
+                                    <group colspan="2">
+                                        <field  name="tax_line_ids" nolabel="1">
+                                            <tree create="false" delete="false">
+                                                <field name="tax_id"/>
+                                                <field name="tax_amount" sum="Impuestos"/>
+                                            </tree>
+                                        </field>
+                                    </group>
+                                    <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                        <field name="delivery_charges" options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                        <field name="cod_charges" options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                        <div class="oe_subtotal_footer_separator oe_inline">
+                                            <label for="amount_untaxed"/>
+                                        </div>
+                                        <field class="oe_subtotal_footer_separator" name="amount_untaxed" nolabel="1" options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                        <field name="amount_tax" options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                        <div class="oe_subtotal_footer_separator oe_inline">
+                                            <label for="amount_total"/>
+                                        </div>
+                                        <field class="oe_subtotal_footer_separator" name="amount_total" nolabel="1" options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                    </group>
+                                </group>
+                            </group>
+                        </page>
+                     <page string="Notes">
+                            <field attrs="{'readonly':[('state','in',('confirmed', 'cancel'))]}" colspan="4" name="notes" nolabel="1" placeholder="Notes..."/>
+                        </page>
+                        <page string="Log">
+                            <group col="4" colspan="4">
+                                <group colspan="2">
+                                    <separator colspan="2" string="Client Invoice Data"/>
+                                    <field name="invoice_id"/>
+                                    <field name="invoice_paid"/>
+                                    <newline/>
+                                </group>
+                                <group colspan="2">
+                                    <separator colspan="2" string="COD Invoice Data"/>
+                                    <field name="payment_move_id"/>
+                                </group>
+                            </group>
+                        </page>
+                       <page  groups="base.group_no_one" string="Customer Signature" name="customer_signature" attrs="{'invisible': [('require_signature', '=', False), ('signed_by', '=', False), ('signature', '=', False), ('signed_on', '=', False)]}">
+                            <group>
+                                <field name="require_signature"/>
+                                <field name="signed_by"/>
+                                <field name="signed_on"/>
+                                <field name="signature" widget="image"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+               <div class="oe_chatter">
+              <field name="message_follower_ids" widget="mail_followers"/>
+              <field name="activity_ids" widget="mail_activity"/>
+              <field name="message_ids" widget="mail_thread"/>
+            </div>
+            </form>
+        </field>
+    </record>
+    <!-- tree view-->
+    <record model="ir.ui.view" id="orders_tree_view">
+        <field name="name">orders.tree</field>
+        <field name="model">orders</field>
+        <field name="arch" type="xml">
+            <tree string="Orders Tree">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="amount_untaxed" sum="Amount Untaxed"/>
+                <field name="amount_tax"/>
+                <field name="amount_total"/>
+                <field name="amount"/>
+                <field invisible="1" name="invoice_id"/>
+                <field invisible="1" name="user_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="orders_search_view">
+        <field name="name">orders.search</field>
+        <field name="model">orders</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="reference"/>
+                 <field name="name" />
+                <field name="description"/>
+                <field name="responsible_id"/>
+                <field name="user_id"/>
+                <filter name="draft" domain="[('state','=','draft')]" string="Draft"/>
+                <filter name="review" domain="[('state','=','approved')]" string="Review"/>
+                <filter name="in_stock" domain="[('state','=','in_stock')]" string="In Stock"/>
+                <filter name="confirm" domain="[('state','=','confirm')]" string="Confirm"
+                />
+                <filter name="pending" domain="[('state','=','pending')]" string="Pending"/>
+                <filter name="with_captain" domain="[('state','=','with_captain')]" string="With Captain"/>
+                <filter name="delivered" domain="[('state','=','delivered')]" string="Delivered"/>
+                <filter name="not_found" domain="[('state','=','not_found')]" string="Not Found"/>
+                <filter name="return" domain="[('state','=','return')]" string="Return"/>
+                <filter name="recived_money" domain="[('state','=','not_found')]" string="Recived Money"/>
+                <filter name="sent" domain="[('state','=','not_found')]" string="sent"/>
+                <filter name="invoiced" domain="[('invoice_id','!=', False)]" string="Invoiced"/>
+                <filter name="not_invoiced" domain="[('invoice_id','=', False)]" string="Not Invoiced"/>
+                <filter domain="[('state','!=','cancel')]" name="not_cancelled" string="Not Cancelled"/>
+                <filter domain="[('date','&gt;=', time.strftime('%Y-%m-01'))]" name="this_month" string="From this month"/>
+                <filter name="my_orders" domain="[('responsible_id','=',uid)]" string="My orders"/>
+                <filter name="customer" context="{'group_by':'partner_id'}" string="Customer"/>
+                <filter name="state" context="{'group_by':'state'}" string="State"/>
+                <filter name="order_date" context="{'group_by':'date'}" string="Order Date"/>
+                <filter name="salesman" context="{'group_by':'user_id'}" string="Sales Man"/>
+                <filter name="period" context="{'group_by' : 'date'}" string="Period"/>
+                <filter name="by_responsible" string="Responsible"
+                            context="{'group_by': 'responsible_id'}"/>
+
+            </search>
+        </field>
+    </record>
+    <record id="view_fms_waybill_calendar" model="ir.ui.view">
+        <field name="name">fms.order.calendar</field>
+        <field name="model">orders</field>
+        <field name="arch" type="xml">
+            <calendar color="state" date_start="date" string="Orders">
+                <field name="partner_id"/>
+                <field name="amount_untaxed"/>
+            </calendar>
+        </field>
+    </record>
+    <record id="view_fms_order_graph" model="ir.ui.view">
+        <field name="name">fms.order.graph</field>
+        <field name="model">orders</field>
+        <field name="arch" type="xml">
+            <graph string="Order" type="bar">
+                <field name="partner_id"/>
+                <field name="amount_untaxed" operator="+"/>
+            </graph>
+        </field>
+    </record>
+    <!-- window action -->
+    <!--
+        The following tag is an action definition for a "window action",
+        that is an action opening a view or a set of views
+    -->
+     <record id="model_order_action_quotation_sent" model="ir.actions.server">
+            <field name="name">Send Email to Customer</field>
+            <field name="model_id" ref="fms.model_orders"/>
+            <field name="binding_model_id" ref="fms.model_orders"/>
+            <field name="binding_view_types">form,list</field>
+            <field name="state">code</field>
+            <field name="code">action = records.action_send_email()</field>
+        </record>
+     <record id="model_order_action_quotation_as_sent" model="ir.actions.server">
+            <field name="name">Mark Order as Sent</field>
+            <field name="model_id" ref="fms.model_orders"/>
+            <field name="binding_model_id" ref="fms.model_orders"/>
+            <field name="binding_view_types">form,list</field>
+            <field name="state">code</field>
+            <field name="code">action = records.action_order_sent()</field>
+        </record>
+
+    <record model="ir.actions.act_window" id="orders_list_action">
+        <field name="name">Orders</field>
+        <field name="res_model">orders</field>
+        <field name="view_mode">tree,form,graph,calendar</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">Create the first order
+            </p>
+        </field>
+         <field name="search_view_id" ref="orders_search_view"/>
+        <field name="context">{&quot;search_default_user_id&quot;:uid, 'search_default_this_month': 1}</field>
+    </record>
+        <record id="view_confirm_orders_done_setting" model="ir.ui.view">
+            <field name="name">invoiced.order.form</field>
+            <field name="model">orders</field>
+            <field name="inherit_id" ref="fms.orders_form_view"/>
+            <field name="groups_id" eval="[(4, ref('fms.confirm_orders'))]"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form//header//button[@name='action_in_stock']" position="after">
+                   <button name="action_confirm" type="object" string="Confirm"
+                            attrs="{'invisible': [('state', 'not in', ['draft','review','sent'])]}"
+                           groups="fms.confirm_orders"
+                    />
+                    <button name="action_confirm" class="btn-primary" type="object" string="Confirm"
+                            attrs="{'invisible': [('state', 'not in', ['in_stock'])]}"
+                            groups="fms.confirm_orders"/>
+                </xpath>
+            </field>
+        </record>
+    <record id="view_invoiced_orders_done_setting" model="ir.ui.view">
+            <field name="name">invoiced.order.form</field>
+            <field name="model">orders</field>
+            <field name="inherit_id" ref="fms.orders_form_view"/>
+            <field name="groups_id" eval="[(4, ref('fms.invoiced_orders'))]"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//form//header//button[@name='action_recived_money']" position="after">
+                 <button name="action_invoiced" class="btn-primary" type="object" string="Invoiced"
+                            attrs="{'invisible': [('state', 'not in', ['recived_money'])]}"
+                           groups="fms.invoiced_orders"
+                    />
+
+                </xpath>
+            </field>
+        </record>
+    <menuitem action="orders_list_action" id="menu_orders" parent="main_operations_menu" sequence="1"
+              name="Orders"
+  groups="fms.group_finance,fms.user_only_order,fms.group_operation,fms.group_manager,fms.group_account,fms.user_all_sale,fms.sales_manager"
+/>
+</odoo>

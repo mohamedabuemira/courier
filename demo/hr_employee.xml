@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="fms_hr_employee_01" model="hr.employee">
+        <field name="name"> mohamed faro</field>
+        <field name="address_id" ref="base.main_partner"/>
+        <field name="driver" eval="True"/>
+        <field name="driver_license">QROO002722</field>
+        <field name="days_to_expire">365</field>
+        <field name="license_type">A</field>
+        <field name="license_valid_from" eval="datetime.now()"/>
+        <field name="license_expiration" eval="datetime.now()+timedelta(days=365)"/>
+    </record>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <report
+        id="report_order"
+        model="orders"
+        string="waybill Report v1 "
+        name="fms.report_order_view"
+        file="fms.report_order"
+        report_type="qweb-pdf"
+        print_report_name="' waybill - %s' % (object.name)"
+
+
+    />
+
+    <template id="report_order_view">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 t-field="doc.name" />
+                        <p>From <span t-field="doc.partner_order_id" /> to <span t-field="doc.recevier_name" /></p>
+                         <p>Phone /  <span t-field="doc.sender_phone" /> Phone /   <span t-field="doc.recevier_phone" /></p>
+                        <h3>Amounts</h3>:
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
